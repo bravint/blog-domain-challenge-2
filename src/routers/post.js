@@ -7,8 +7,8 @@ const {
     getPostsByUser,
     createPost,
     createComment,
-    updatePost,
-    updateComment,
+    //updatePost,
+    //updateComment,
 } = require('../controllers/post');
 
 router.get('/', getPosts);
@@ -19,8 +19,8 @@ router.post('/', createPost);
 
 router.post('/:id/comment/', createComment);
 
-router.put('/:id', updatePost);
+//router.put('/:id', updatePost);
 
-router.put('/:id/comment/:id', updateComment);
+//router.put('/:id/comment/:id', updateComment);
 
 module.exports = router;

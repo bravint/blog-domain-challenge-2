@@ -146,6 +146,6 @@ module.exports = {
     getPostsByUser,
     createPost,
     createComment,
-    updatePost,
-    updateComment,
+    //updatePost,
+    //updateComment,
 };
