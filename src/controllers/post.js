@@ -2,6 +2,52 @@ const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
+const getPosts = async (req, res) => {
+    let queryFilters = {};
+    queryFilters = generateQueryFilters(req.query);
+
+    const postsFetched = await prisma.post.findMany({
+        ...queryFilters,
+        include: {
+            categories: true,
+            comment: true,
+        }
+    });
+
+    return res.json(postsFetched);
+};
+
+const getPostsByUser = async (req, res) => {
+    let { user } = req.params;
+
+    let queryFilters = {};
+    queryFilters = generateQueryFilters(req.query);
+
+    let name;
+    let id;
+
+    isNaN(parseInt(user, 10)) ? (name = user) : (id = user);
+
+    id = parseInt(id, 10);
+
+    let paramFilters;
+    if (name) paramFilters = { userId: await getUserId(name) };
+    if (id) paramFilters = { userId: id };
+
+    const postsFetched = await prisma.post.findMany({
+        ...queryFilters,
+        where: {
+            ...paramFilters,
+        },
+        include: {
+            categories: true,
+            comment: true,
+        }
+    });
+
+    return res.json(postsFetched);
+};
+
 const createPost = async (req, res) => {
     const { categories, title, content, imgUrl, userId } = req.body;
 
@@ -70,52 +116,6 @@ const createComment = async (req, res) => {
     return res.json(createdComment);
 };
 
-const getPosts = async (req, res) => {
-    let queryFilters = {};
-    queryFilters = generateQueryFilters(req.query);
-
-    const postsFetched = await prisma.post.findMany({
-        ...queryFilters,
-        include: {
-            categories: true,
-            comment: true,
-        }
-    });
-
-    return res.json(postsFetched);
-};
-
-const getPostsByUser = async (req, res) => {
-    let { user } = req.params;
-
-    let queryFilters = {};
-    queryFilters = generateQueryFilters(req.query);
-
-    let name;
-    let id;
-
-    isNaN(parseInt(user, 10)) ? (name = user) : (id = user);
-
-    id = parseInt(id, 10);
-
-    let paramFilters;
-    if (name) paramFilters = { userId: await getUserId(name) };
-    if (id) paramFilters = { userId: id };
-
-    const postsFetched = await prisma.post.findMany({
-        ...queryFilters,
-        where: {
-            ...paramFilters,
-        },
-        include: {
-            categories: true,
-            comment: true,
-        }
-    });
-
-    return res.json(postsFetched);
-};
-
 const generateQueryFilters = (query) => {
     let { limit, orderBy } = query;
 
@@ -137,12 +137,15 @@ const getUserId = async (name) => {
             username: name,
         },
     });
+    
     return user.id;
 };
 
 module.exports = {
-    createPost,
-    createComment,
     getPosts,
     getPostsByUser,
+    createPost,
+    createComment,
+    updatePost,
+    updateComment,
 };
