@@ -38,6 +38,7 @@ const createPost = async (req, res) => {
             categories: true,
         },
     });
+
     return res.json(createdPost);
 };
 
@@ -65,11 +66,83 @@ const createComment = async (req, res) => {
             },
         },
     });
-    console.log(`createdComment`, createdComment);
+
     return res.json(createdComment);
+};
+
+const getPosts = async (req, res) => {
+    let queryFilters = {};
+    queryFilters = generateQueryFilters(req.query);
+
+    const postsFetched = await prisma.post.findMany({
+        ...queryFilters,
+        include: {
+            categories: true,
+            comment: true,
+        }
+    });
+
+    return res.json(postsFetched);
+};
+
+const getPostsByUser = async (req, res) => {
+    let { user } = req.params;
+
+    let queryFilters = {};
+    queryFilters = generateQueryFilters(req.query);
+
+    let name;
+    let id;
+
+    isNaN(parseInt(user, 10)) ? (name = user) : (id = user);
+
+    id = parseInt(id, 10);
+
+    let paramFilters;
+    if (name) paramFilters = { userId: await getUserId(name) };
+    if (id) paramFilters = { userId: id };
+
+    const postsFetched = await prisma.post.findMany({
+        ...queryFilters,
+        where: {
+            ...paramFilters,
+        },
+        include: {
+            categories: true,
+            comment: true,
+        }
+    });
+
+    return res.json(postsFetched);
+};
+
+const generateQueryFilters = (query) => {
+    let { limit, orderBy } = query;
+
+    let queryFilters = {};
+
+    if (limit) {
+        limit = parseInt(limit, 10);
+        queryFilters = { ...queryFilters, take: limit };
+    }
+
+    if (orderBy) queryFilters = { ...queryFilters, orderBy: { id: orderBy } };
+
+    return queryFilters;
+};
+
+const getUserId = async (name) => {
+    const user = await prisma.user.findUnique({
+        where: {
+            username: name,
+        },
+    });
+    return user.id;
 };
 
 module.exports = {
     createPost,
     createComment,
+    getPosts,
+    getPostsByUser,
 };
