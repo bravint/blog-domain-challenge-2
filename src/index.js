@@ -1,14 +1,22 @@
+require('dotenv').config()
+
 const express = require('express')
 const cors = require('cors')
+const morgan = require('morgan')
+
+const userRouter = require('./routers/user');
 
 const app = express()
+const port = process.env.PORT
 
-const port = 3000
+app.use(cors())
+app.use(morgan('dev'))
+app.use(express.json())
 
-app.get('/', (req, res) => {
-  res.send('Hello World!')
+app.use('/user', userRouter);
+
+app.get('*', (req, res) => {
+  res.send('Server status: OK')
 })
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
+app.listen(port, () => console.log(`Server started on port ${port}`))
