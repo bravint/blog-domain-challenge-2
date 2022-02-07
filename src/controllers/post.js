@@ -20,8 +20,8 @@ const createPost = async (req, res) => {
                     return {
                         category: {
                             connectOrCreate: {
-                                where: {name: category.name},
-                                create: {name: category.name}
+                                where: { name: category.name },
+                                create: { name: category.name },
                             },
                         },
                     };
@@ -32,8 +32,8 @@ const createPost = async (req, res) => {
             user: true,
             user: {
                 include: {
-                    profile: true
-                }
+                    profile: true,
+                },
             },
             categories: true,
         },
@@ -41,6 +41,35 @@ const createPost = async (req, res) => {
     return res.json(createdPost);
 };
 
+const createComment = async (req, res) => {
+    const { parentId, content, userId, postId } = req.body;
+
+    let data = {
+        content,
+    };
+
+    if (parentId) data = { ...data, parentId };
+
+    const createdComment = await prisma.comment.create({
+        data: {
+            ...data,
+            user: {
+                connect: {
+                    id: userId,
+                },
+            },
+            post: {
+                connect: {
+                    id: postId,
+                },
+            },
+        },
+    });
+    console.log(`createdComment`, createdComment);
+    return res.json(createdComment);
+};
+
 module.exports = {
     createPost,
+    createComment,
 };
