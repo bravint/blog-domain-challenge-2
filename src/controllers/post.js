@@ -247,8 +247,6 @@ const removeCategoryFromPost = async (categoriesToRemove, id) => {
 const deletePost = async (req, res) => {
     const id = idToInteger(req.params);
 
-    await deleteRepliesToPost(id);
-
     const deletedPost = await prisma.post.delete({
         where: {
             id,
@@ -258,20 +256,10 @@ const deletePost = async (req, res) => {
     res.json(deletedPost);
 };
 
-const deleteRepliesToPost = async (postId) => {
-    await prisma.comment.deleteMany({
-        where: {
-            postId: postId,
-        },
-    });
-};
-
 const handleDeleteComment = async (req, res) => {
     const id = idToInteger(req.params);
 
     const targetComment = await getCommentById(id);
-
-    console.log(`targetComment`, targetComment);
 
     let parentId;
 

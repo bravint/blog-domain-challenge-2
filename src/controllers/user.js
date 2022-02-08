@@ -92,18 +92,6 @@ const generateProfile = (requestBody) => {
 const deleteUser = async (req, res) => {
     const id = idToInteger(req.params);
 
-    await prisma.post.deleteMany({
-        where: {
-            userId: id,
-        },
-    });
-
-    await prisma.comment.deleteMany({
-        where: {
-            userId: id,
-        },
-    });
-
     const deletedUser = await prisma.user.delete({
         where: {
             id,
