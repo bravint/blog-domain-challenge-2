@@ -222,7 +222,11 @@ const getUserId = async (username) => {
 const generatePost = (requestBody) => {
     const { title, content, imgUrl } = requestBody;
 
-    const post = { title, content, imgUrl };
+    let post = {};
+
+    if (title) post = { ...post, title };
+    if (content) post = { ...post, content };
+    if (imgUrl) post = { ...post, imgUrl };
 
     return post;
 };

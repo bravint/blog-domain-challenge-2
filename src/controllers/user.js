@@ -67,11 +67,11 @@ const updateProfile = async (req, res) => {
 const generateUser = (requestBody) => {
     const { username, email, password } = requestBody;
 
-    const user = {
-        username,
-        password,
-        email,
-    };
+    let user = {}
+
+    if (username) user = { ...user, username}
+    if (password) user = { ...user, password}
+    if (email) user = { ...user, email}
 
     return user;
 };
@@ -79,12 +79,12 @@ const generateUser = (requestBody) => {
 const generateProfile = (requestBody) => {
     const { firstName, lastName, age, pictureUrl } = requestBody;
 
-    const profile = {
-        firstName,
-        lastName,
-        age,
-        pictureUrl,
-    };
+    let profile = {};
+
+    if (firstName) profile = { ...profile, firstName };
+    if (lastName) profile = { ...profile, lastName };
+    if (firstName) age = { ...profile, age };
+    if (firstName) pictureUrl = { ...profile, pictureUrl };
 
     return profile;
 };
