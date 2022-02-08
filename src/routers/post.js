@@ -8,7 +8,7 @@ const {
     createPost,
     createComment,
     updatePost,
-    updateComment,
+    handleUpdateComment,
     updateCategory,
     deletePost,
     handleDeleteComment
@@ -24,7 +24,7 @@ router.post('/:id/comment/', createComment);
 
 router.put('/:id', updatePost);
 
-router.put('/:id/comment/:id', updateComment);
+router.put('/:id/comment/:id', handleUpdateComment);
 
 router.put('/category/:id', updateCategory);
 

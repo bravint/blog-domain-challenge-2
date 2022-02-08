@@ -158,10 +158,16 @@ const updatePost = async (req, res) => {
     return res.json(updatedPost);
 };
 
-const updateComment = async (req, res) => {
+const handleUpdateComment = async (req, res) => {
     const id = idToInteger(req.params);
     const { content } = req.body;
 
+    const updatedComment = updateComment(id, content);
+
+    return res.json(updatedComment);
+};
+
+const updateComment = async (id, content) => {
     const updatedComment = await prisma.comment.update({
         where: {
             id,
@@ -170,7 +176,7 @@ const updateComment = async (req, res) => {
             content,
         },
     });
-    return res.json(updatedComment);
+    return updatedComment;
 };
 
 const updateCategory = async (req, res) => {
@@ -265,7 +271,12 @@ const handleDeleteComment = async (req, res) => {
 
     const targetComment = await getCommentById(id);
 
-    const { parentId } = targetComment;
+    console.log(`targetComment`, targetComment);
+
+    let parentId;
+
+    if (targetComment) parentId = targetComment.parentId;
+    if (!targetComment) return res.status(404).send('comment not found');
 
     let deletedComment;
 
@@ -302,8 +313,10 @@ const deleteParentComment = async (id) => {
         },
     });
 
-    if (comment) {
-        updateComment({ body: { content: `[removed]` }, params: id });
+    console.log(`comment`, comment)
+
+    if (comment.length > 0) {
+        return updateComment(id, `[removed]`);
     } else {
         return await deleteComment(id);
     }
@@ -315,7 +328,7 @@ module.exports = {
     createPost,
     createComment,
     updatePost,
-    updateComment,
+    handleUpdateComment,
     updateCategory,
     deletePost,
     handleDeleteComment,
