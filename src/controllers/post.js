@@ -1,8 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
-
-const prisma = new PrismaClient();
-
-const { idToInteger } = require('../utils');
+const { idToInteger, prisma } = require('../utils');
 
 const getPost = async (req, res) => {
     let queryFilters = {};

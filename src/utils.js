@@ -1,3 +1,6 @@
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
 const idToInteger =  (params) => {
     let { id } = params;
 
@@ -5,5 +8,6 @@ const idToInteger =  (params) => {
 };
 
 module.exports = {
-    idToInteger
+    idToInteger,
+    prisma
 };

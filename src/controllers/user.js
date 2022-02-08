@@ -1,8 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
-
-const prisma = new PrismaClient();
-
-const { idToInteger } = require('../utils');
+const { idToInteger, prisma } = require('../utils');
 
 const createUser = async (req, res) => {
     const user = generateUser(req.body);
