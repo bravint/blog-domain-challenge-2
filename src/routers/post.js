@@ -3,19 +3,20 @@ const express = require('express');
 const router = express.Router();
 
 const {
-    getPosts,
-    getPostsByUser,
+    getPost,
+    getPostByUser,
     createPost,
     createComment,
     updatePost,
     updateComment,
     updateCategory,
-    deletePost
+    deletePost,
+    handleDeleteComment
 } = require('../controllers/post');
 
-router.get('/', getPosts);
+router.get('/', getPost);
 
-router.get('/user/:user', getPostsByUser);
+router.get('/user/:user', getPostByUser);
 
 router.post('/', createPost);
 
@@ -28,5 +29,7 @@ router.put('/:id/comment/:id', updateComment);
 router.put('/category/:id', updateCategory);
 
 router.delete('/:id', deletePost)
+
+router.delete('/:id/comment/:id', handleDeleteComment);
 
 module.exports = router;

@@ -1,5 +1,5 @@
-const idToInteger = (params) => {
-    const { id } = params;
+const idToInteger =  (params) => {
+    let { id } = params;
 
     return parseInt(id, 10);
 };

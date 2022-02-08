@@ -2,9 +2,9 @@ const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
-const {idToInteger} = require('../utils')
+const { idToInteger } = require('../utils');
 
-const getPosts = async (req, res) => {
+const getPost = async (req, res) => {
     let queryFilters = {};
     queryFilters = generateQueryFilters(req.query);
 
@@ -19,7 +19,7 @@ const getPosts = async (req, res) => {
     return res.json(postsFetched);
 };
 
-const getPostsByUser = async (req, res) => {
+const getPostByUser = async (req, res) => {
     let { user } = req.params;
 
     let queryFilters = {};
@@ -119,7 +119,7 @@ const createComment = async (req, res) => {
 };
 
 const updatePost = async (req, res) => {
-    const { id } = idToInteger(req.params);
+    const id = idToInteger(req.params);
     let { categories, categoriesToRemove } = req.body;
 
     const post = generatePost(req.body);
@@ -163,7 +163,7 @@ const updatePost = async (req, res) => {
 };
 
 const updateComment = async (req, res) => {
-    const { id } = idToInteger(req.params);
+    const id = idToInteger(req.params);
     const { content } = req.body;
 
     const updatedComment = await prisma.comment.update({
@@ -178,7 +178,7 @@ const updateComment = async (req, res) => {
 };
 
 const updateCategory = async (req, res) => {
-    const { id } = idToInteger(req.params);
+    const id = idToInteger(req.params);
     const { name } = req.body;
 
     const updatedCategory = await prisma.comment.update({
@@ -243,7 +243,7 @@ const removeCategoryFromPost = async (categoriesToRemove, id) => {
 };
 
 const deletePost = async (req, res) => {
-    const { id } = idToInteger(req.params);
+    const id = idToInteger(req.params);
 
     await deleteRepliesToPost(id);
 
@@ -264,18 +264,63 @@ const deleteRepliesToPost = async (postId) => {
     });
 };
 
-const deleteComment = async (req, res) => {
-    const { id } = idToInteger(req.params);
+const handleDeleteComment = async (req, res) => {
+    const id = idToInteger(req.params);
 
-}
+    const targetComment = await getCommentById(id);
+
+    const { parentId } = targetComment;
+
+    let deletedComment;
+
+    if (parentId) {
+        deletedComment = await deleteComment(id);
+    } else {
+        deletedComment = await deleteParentComment(id);
+    }
+
+    res.json(deletedComment);
+};
+
+const deleteComment = async (id) => {
+    return await prisma.comment.delete({
+        where: {
+            id,
+        },
+    });
+};
+
+const getCommentById = async (id) => {
+    const comment = await prisma.comment.findUnique({
+        where: {
+            id,
+        },
+    });
+    return comment;
+};
+
+const deleteParentComment = async (id) => {
+    const comment = await prisma.comment.findMany({
+        where: {
+            parentId: id,
+        },
+    });
+
+    if (comment) {
+        updateComment({ body: { content: `[removed]` }, params: id });
+    } else {
+        return await deleteComment(id);
+    }
+};
 
 module.exports = {
-    getPosts,
-    getPostsByUser,
+    getPost,
+    getPostByUser,
     createPost,
     createComment,
     updatePost,
     updateComment,
     updateCategory,
     deletePost,
+    handleDeleteComment,
 };

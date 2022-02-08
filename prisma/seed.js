@@ -17,7 +17,9 @@ const createUser = async () => {
             password: 'niceTry',
         },
     });
+    
     console.log(`createdUser`, createdUser);
+
     return createdUser;
 };
 
@@ -35,17 +37,19 @@ const createProfile = async (user) => {
             },
         },
     });
+
     console.log(`createdProfile`, createdProfile);
+
     return createdProfile;
 };
 
 const createCategory = async () => {
-    console.log(`creating category`)
     const categoriesToCreate = ['catA', 'catB', 'catC', 'catD', 'catE'];
-    console.log(`categoriesToCreate`, categoriesToCreate)
+    
     let categories = [];
+
     for (let i = 0; i < categoriesToCreate.length; i++) {
-        console.log(categoriesToCreate[i])
+        
         const createdCategory = await prisma.category.create({
             data: {
                 name: categoriesToCreate[i],
@@ -53,7 +57,9 @@ const createCategory = async () => {
         });
         categories.push(createdCategory);
     }
+
     console.log(`createdCategories`, categories);
+
     return categories;
 };
 
