@@ -313,8 +313,6 @@ const deleteParentComment = async (id) => {
         },
     });
 
-    console.log(`comment`, comment)
-
     if (comment.length > 0) {
         return updateComment(id, `[removed]`);
     } else {
