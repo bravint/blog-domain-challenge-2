@@ -11,7 +11,7 @@ const getPosts = async (req, res) => {
         include: {
             categories: true,
             comment: true,
-        }
+        },
     });
 
     return res.json(postsFetched);
@@ -42,20 +42,20 @@ const getPostsByUser = async (req, res) => {
         include: {
             categories: true,
             comment: true,
-        }
+        },
     });
 
     return res.json(postsFetched);
 };
 
 const createPost = async (req, res) => {
-    const { categories, title, content, imgUrl, userId } = req.body;
+    const { categories, userId } = req.body;
+
+    const post = generatePost(req.body);
 
     const createdPost = await prisma.post.create({
         data: {
-            title,
-            content,
-            imgUrl,
+            ...post,
             user: {
                 connect: {
                     id: userId,
@@ -116,6 +116,80 @@ const createComment = async (req, res) => {
     return res.json(createdComment);
 };
 
+const updatePost = async (req, res) => {
+    const { id } = idToInteger(req.params);
+    let { categories, categoriesToRemove } = req.body;
+
+    const post = generatePost(req.body);
+
+    !categories ? (categories = []) : categories;
+
+    if (categoriesToRemove)
+        await removeCategoryFromPost(categoriesToRemove, id);
+
+    const updatedPost = await prisma.post.update({
+        where: {
+            id,
+        },
+        data: {
+            ...post,
+            categories: {
+                create: categories.map((category) => {
+                    return {
+                        category: {
+                            connectOrCreate: {
+                                where: { name: category.name },
+                                create: { name: category.name },
+                            },
+                        },
+                    };
+                }),
+            },
+        },
+        include: {
+            user: true,
+            user: {
+                include: {
+                    profile: true,
+                },
+            },
+            categories: true,
+        },
+    });
+
+    return res.json(updatedPost);
+};
+
+const updateComment = async (req, res) => {
+    const { id } = idToInteger(req.params);
+    const { content } = req.body;
+
+    const updatedComment = await prisma.comment.update({
+        where: {
+            id,
+        },
+        data: {
+            content,
+        },
+    });
+    return res.json(updatedComment);
+};
+
+const updateCategory = async (req, res) => {
+    const { id } = idToInteger(req.params);
+    const { name } = req.body;
+
+    const updatedCategory = await prisma.comment.update({
+        where: {
+            id,
+        },
+        data: {
+            name,
+        },
+    });
+    return res.json(updatedCategory);
+};
+
 const generateQueryFilters = (query) => {
     let { limit, orderBy } = query;
 
@@ -131,14 +205,45 @@ const generateQueryFilters = (query) => {
     return queryFilters;
 };
 
-const getUserId = async (name) => {
+const getUserId = async (username) => {
     const user = await prisma.user.findUnique({
         where: {
-            username: name,
+            username,
         },
     });
-    
+
     return user.id;
+};
+
+const generatePost = (requestBody) => {
+    const { title, content, imgUrl } = requestBody;
+
+    const post = { title, content, imgUrl };
+
+    return post;
+};
+
+const idToInteger = (params) => {
+    const { id } = params;
+
+    return parseInt(id, 10);
+};
+
+const removeCategoryFromPost = async (categoriesToRemove, id) => {
+    await prisma.post.update({
+        where: {
+            id,
+        },
+        data: {
+            categories: {
+                deleteMany: categoriesToRemove.map((category) => {
+                    return {
+                        categoryId: parseInt(category.id, 10),
+                    };
+                }),
+            },
+        },
+    });
 };
 
 module.exports = {
@@ -146,6 +251,7 @@ module.exports = {
     getPostsByUser,
     createPost,
     createComment,
-    //updatePost,
-    //updateComment,
+    updatePost,
+    updateComment,
+    updateCategory,
 };

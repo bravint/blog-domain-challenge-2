@@ -3,60 +3,94 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 const createUser = async (req, res) => {
-    const { username, email, password, firstName, lastName, age, pictureUrl } =
-        req.body;
+    const user = generateUser(req.body);
+    const profile = generateProfile(req.body);
 
     const createdUser = await prisma.user.create({
         data: {
-            username,
-            email,
-            password,
+            ...user,
             profile: {
                 create: {
-                    firstName,
-                    lastName,
-                    age,
-                    pictureUrl,
+                    ...profile,
                 },
             },
         },
-        include: { profile: true },
+        include: {
+            profile: true,
+        },
     });
     return res.json(createdUser);
 };
 
 const updateUser = async (req, res) => {
-    let { id } = req.params;
-    const { username, email, password, firstName, lastName, age, pictureUrl } =
-        req.body;
+    const { id } = idToInteger(req.params);
 
-    id = parseInt(id, 10);
+    const user = generateUser(req.body);
+    const profile = generateProfile(req.body);
 
-    const updateUser = await prisma.user.update({
-        where: { 
-            id: id
+    const updatedUser = await prisma.user.update({
+        where: {
+            id,
         },
         data: {
-            username,
-            email,
-            password,
+            ...user,
             profile: {
                 update: {
-                    firstName,
-                    lastName,
-                    age,
-                    pictureUrl,
-                } 
+                    ...profile,
+                },
             },
         },
-        include: { 
-            profile: true 
+        include: {
+            profile: true,
         },
     });
-    return res.json(updateUser);
+    return res.json(updatedUser);
 };
+
+const updateProfile = async (req, res) => {
+    const { id } = idToInteger(req.params);
+
+    const profile = generateProfile(req.body);
+
+    const updatedProfile = await prisma.profile.update({
+        where: {
+            id,
+        },
+        data: {
+            ...profile,
+        },
+    });
+    return res.json(updatedProfile);
+};
+
+const generateUser = (requestBody) => {
+    const { username, email, password } = requestBody;
+    const user = {
+        username,
+        password,
+        email,
+    };
+    return user;
+};
+
+const generateProfile = (requestBody) => {
+    const { firstName, lastName, age, pictureUrl } = requestBody;
+    const profile = {
+        firstName,
+        lastName,
+        age,
+        pictureUrl,
+    };
+    return profile;
+};
+
+const idToInteger = (params) => {
+    let { id } = params;
+    return parseInt(id, 10);
+}
 
 module.exports = {
     createUser,
     updateUser,
+    updateProfile,
 };
