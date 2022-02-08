@@ -2,6 +2,8 @@ const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
+const {idToInteger} = require('../utils')
+
 const getPosts = async (req, res) => {
     let queryFilters = {};
     queryFilters = generateQueryFilters(req.query);
@@ -223,12 +225,6 @@ const generatePost = (requestBody) => {
     return post;
 };
 
-const idToInteger = (params) => {
-    const { id } = params;
-
-    return parseInt(id, 10);
-};
-
 const removeCategoryFromPost = async (categoriesToRemove, id) => {
     await prisma.post.update({
         where: {
@@ -246,6 +242,33 @@ const removeCategoryFromPost = async (categoriesToRemove, id) => {
     });
 };
 
+const deletePost = async (req, res) => {
+    const { id } = idToInteger(req.params);
+
+    await deleteRepliesToPost(id);
+
+    const deletedPost = await prisma.post.delete({
+        where: {
+            id,
+        },
+    });
+
+    res.json(deletedPost);
+};
+
+const deleteRepliesToPost = async (postId) => {
+    await prisma.comment.deleteMany({
+        where: {
+            postId: postId,
+        },
+    });
+};
+
+const deleteComment = async (req, res) => {
+    const { id } = idToInteger(req.params);
+
+}
+
 module.exports = {
     getPosts,
     getPostsByUser,
@@ -254,4 +277,5 @@ module.exports = {
     updatePost,
     updateComment,
     updateCategory,
+    deletePost,
 };

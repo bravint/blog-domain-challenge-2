@@ -8,8 +8,9 @@ const {
     createPost,
     createComment,
     updatePost,
-    //updateComment,
-    //updateCategory
+    updateComment,
+    updateCategory,
+    deletePost
 } = require('../controllers/post');
 
 router.get('/', getPosts);
@@ -22,8 +23,10 @@ router.post('/:id/comment/', createComment);
 
 router.put('/:id', updatePost);
 
-//router.put('/:id/comment/:id', updateComment);
+router.put('/:id/comment/:id', updateComment);
 
-//router.put('/category/:id', updateCategory);
+router.put('/category/:id', updateCategory);
+
+router.delete('/:id', deletePost)
 
 module.exports = router;

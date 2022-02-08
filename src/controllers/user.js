@@ -2,6 +2,8 @@ const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
+const {idToInteger} = require('../utils')
+
 const createUser = async (req, res) => {
     const user = generateUser(req.body);
     const profile = generateProfile(req.body);
@@ -83,11 +85,6 @@ const generateProfile = (requestBody) => {
     };
     return profile;
 };
-
-const idToInteger = (params) => {
-    let { id } = params;
-    return parseInt(id, 10);
-}
 
 module.exports = {
     createUser,
